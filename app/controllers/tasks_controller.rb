@@ -1,6 +1,7 @@
 class TasksController < ApplicationController
   before_action :require_user_logged_in
-  before_action :correct_user, only: [:destroy]
+  before_action :correct_user, only: [:edit, :update, :destroy]
+  before_action :ensure_correct_user, only: [:edit]
   
   def index
     @tasks = Task.all
@@ -58,6 +59,14 @@ private
   def correct_user
     @task = current_user.tasks.find_by(id: params[:id])
     unless @task
+      redirect_to root_url
+    end
+  end
+  
+  def ensure_correct_user
+    @task = Task.find_by(id:params[:id])
+    if @task.user_id != @current_user.id
+      flash[:notice] = "権限がありません"
       redirect_to root_url
     end
   end
